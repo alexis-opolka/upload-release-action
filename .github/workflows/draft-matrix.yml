@@ -8,9 +8,13 @@ jobs:
       draft_id: ${{ steps.create_release.outputs.draft_id }}
     steps:
       - uses: actions/checkout@v4
+        id: checkout
         with:
+          token: '${{ github.token }}'
           repository: '${{ github.repository }}'
-          ref: 'upload-to-draft'
+      - name: what repo
+        run: |
+          echo "REPO: ${{ github.repository }}/${{ steps.checkout.outputs.ref }}/${{ steps.checkout.outputs.commit }}, ${{ steps.checkout.conclusion }}"
       - name: Create release
         id: create_release
         uses: ./
@@ -20,21 +24,21 @@ jobs:
           body: "Test release to test the matrix upload with a draft release."
           release_name: "Test draft release using Matrix"
 
+
   upload_to_release:
-    name: Publish ${{ matrix.target }}
+    name: Publish on ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
     needs: create_draft_release
     strategy:
       matrix:
         include:
+          - os: macos-latest
+            target: x86_64-apple-darwin
           - os: ubuntu-latest
-          - os: windows-latest
+            target: x86_64-pc-windows-gnu
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          repository: '${{ github.repository }}'
-          ref: 'upload-to-draft'
 
       - name: Make readme unique
         run: |

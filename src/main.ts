@@ -250,6 +250,7 @@ async function run(): Promise<void> {
       make_latest,
       release_name,
       body,
+      // @ts-expect-error TS2345
       octokit,
       overwrite,
       promote,
