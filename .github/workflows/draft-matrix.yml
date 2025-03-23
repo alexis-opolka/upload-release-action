@@ -26,16 +26,14 @@ jobs:
 
 
   upload_to_release:
-    name: Publish on ${{ matrix.target }}
+    name: Publish on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     needs: create_draft_release
     strategy:
       matrix:
         include:
-          - os: macos-latest
-            target: x86_64-apple-darwin
+          - os: ubuntu-22.04
           - os: ubuntu-latest
-            target: x86_64-pc-windows-gnu
 
     steps:
       - uses: actions/checkout@v4
