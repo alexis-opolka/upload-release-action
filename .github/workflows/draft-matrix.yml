@@ -1,0 +1,48 @@
+name: "CI - Matrix draft upload"
+on: [push]
+
+jobs:
+  create_draft_release:
+    runs-on: ubuntu-latest
+    outputs:
+      draft_id: ${{ steps.create_release.outputs.draft_id }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: '${{ github.repository }}'
+          ref: 'upload-to-draft'
+      - name: Create release
+        id: create_release
+        uses: ./
+        with:
+          file: "./README.md"
+          draft: true
+          body: "Test release to test the matrix upload with a draft release."
+          release_name: "Test draft release using Matrix"
+
+  upload_to_release:
+    name: Publish ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    needs: create_draft_release
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+          - os: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: '${{ github.repository }}'
+          ref: 'upload-to-draft'
+
+      - name: Make readme unique
+        run: |
+          cp ./README.md ./README-${{ matrix.os }}.md
+
+      - name: Upload README to release
+        uses: ./
+        with:
+          file: "./README-${{ matrix.os }}.md"
+          draft: true
+          draft_id: ${{ needs.create_draft_release.outputs.draft_id }}
